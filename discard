@@ -1,0 +1,44 @@
+# # 徒歩での経路計算
+# routedict=client.directions((longlats[0],longlats[1]),profile="foot-walking")
+# geometry = routedict["routes"][0]["geometry"]
+# decoded = convert.decode_polyline(geometry)
+
+# # print(decoded["coordinates"])
+
+# routecoord = reverse_lat_long(decoded["coordinates"])
+
+# # foliumでサイズ(600, 400)の地図を描画
+# fig = Figure(width=600, height=400)
+# m = folium.Map(location=(average_latlongs[0], average_latlongs[1]), zoom_start=16)
+# # 位置情報をPolyLineで地図に追加
+# folium.vector_layers.PolyLine(locations=routecoord).add_to(m)
+# fig.add_child(m)
+# m.save("ret.html")
+
+
+
+
+
+# # 各2点間での経路計算
+# routes = []
+# for i in range(len(longlats) - 1):
+#     routedict=client.directions((longlats[i],longlats[i+1]),profile="foot-walking")
+#     geometry = routedict["routes"][0]["geometry"]
+#     decoded = convert.decode_polyline(geometry)
+#     routes.append(reverse_lat_long(decoded["coordinates"]))
+
+# # foliumでサイズ(600, 400)の地図を描画
+# fig = Figure(width=600, height=400)
+# map = folium.Map(location=(average_latlongs[0], average_latlongs[1]), zoom_start=16)
+
+# # 各目的地にマーカー設置
+# for i in range(len(latlongs)):
+#     folium.Marker(location=(latlongs[i])).add_to(map)
+
+# # 経路情報をPolyLineで地図に追加
+# for i in range(len(routes)):
+#     folium.vector_layers.PolyLine(locations=routes[i]).add_to(map)
+
+# # 描画・ファイル出力
+# fig.add_child(map)
+# map.save("route.html")
