@@ -49,13 +49,16 @@ distance_matrix = [
     [1285.66, 1560.26, 1354.36, 1121.71, 0]
     ]
 
-print(distance_matrix)
+# print(distance_matrix)
 
-#移動経路を計算
+# 移動経路を計算
 route = model.find_route.Route(distance_matrix)
-route.start_to_end
-#u = route.return_start()
-# print(u)
+# スタートとゴール固定の場合
+u = route.start_to_end()
+# スタートに戻る場合
+# u = route.return_start()
+
+#print(u)
 
 # ルート順に並び替えた配列を新しく定義
 new_longlats = [0] * len(u)
@@ -63,28 +66,26 @@ new_longlats = [0] * len(u)
 for i in range(len(u)):
     new_longlats[u[i]] = longlats[i]
 
-print(longlats)
-print(new_longlats)
-
-
+# print(longlats)
+# print(new_longlats)
 
 # 複数点間の経路を検索
-# routedict=client.directions(new_longlats,profile="foot-walking")
-# geometry = routedict["routes"][0]["geometry"]
-# decoded = convert.decode_polyline(geometry)
-# route = reverse_lat_long(decoded["coordinates"])
+routedict=client.directions(new_longlats,profile="foot-walking")
+geometry = routedict["routes"][0]["geometry"]
+decoded = convert.decode_polyline(geometry)
+route = reverse_lat_long(decoded["coordinates"])
 
-# # foliumでサイズ(600, 400)の地図を描画
-# fig = Figure(width=600, height=400)
-# map = folium.Map(location=(average_latlongs[0], average_latlongs[1]), zoom_start=16)
+# foliumでサイズ(600, 400)の地図を描画
+fig = Figure(width=600, height=400)
+map = folium.Map(location=(average_latlongs[0], average_latlongs[1]), zoom_start=16)
 
-# # 各目的地にマーカー設置
-# for i in range(len(latlongs)):
-#     folium.Marker(location=(latlongs[i])).add_to(map)
+# 各目的地にマーカー設置
+for i in range(len(latlongs)):
+    folium.Marker(location=(latlongs[i])).add_to(map)
 
-# # 経路情報をPolyLineで地図に追加
-# folium.vector_layers.PolyLine(locations=route).add_to(map)
+# 経路情報をPolyLineで地図に追加
+folium.vector_layers.PolyLine(locations=route).add_to(map)
 
-# # 描画・ファイル出力
-# fig.add_child(map)
-# map.save("route.html")
+# 描画・ファイル出力
+fig.add_child(map)
+map.save("route.html")
