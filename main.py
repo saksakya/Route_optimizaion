@@ -2,7 +2,6 @@ from decimal import Decimal
 import os
 
 import folium
-import pulp as pp
 import openrouteservice
 from branca.element import Figure
 from openrouteservice import convert
@@ -10,6 +9,7 @@ from dotenv import load_dotenv
 
 import model.coordinates as coordinates
 import model.find_route
+import model.input_number as inum
 
 load_dotenv()
 key = os.getenv('OPEN_ROUTE_SERVICE_API_KEY')
@@ -20,9 +20,16 @@ def reverse_lat_long(list):
     """緯度経度をひっくり返す"""
     return [(p[1], p[0]) for p in list]
 
-#latlongs = coordinates.address_to_lonlat('data/address.xlsx')
-latlongs = [['35.671243', '139.702661'], ['35.665846', '139.695831'], ['35.660761', '139.695675'], ['35.662143', '139.698496'], ['35.659443', '139.711598']]
-#print(latlongs)
+mode_tuple = ('foot-walking', 'cycling-regular', 'driving-car')
+
+mode_num = inum.input_number('Choose your means of transportation 0:walking 1:cycling 2:driving  Your choice:', 0, 2)
+method = inum.input_number('Choose a traveling method  0:start to end 1:back to start Your choice:', 0, 1)
+
+latlongs = coordinates.address_to_lonlat('data/address_ex2.xlsx')
+print(latlongs)
+#testdata（上記のAPIは特に負荷をかけるのでテスト段階ではこっちを使うこと)
+# latlongs = [['35.67009', '139.702466'], ['35.666553', '139.696979'], ['35.660664', '139.695053'], ['35.660519', '139.709969'], ['35.655542', '139.711482'], ['35.656409', '139.699354'], ['35.662048', '139.698777'],['35.667287','139.708616'], ['35.646714', '139.710078']]
+
 longlats = reverse_lat_long(latlongs)
 
 # 中間点を計算
@@ -39,24 +46,32 @@ else:
 # print(average_latlongs)
 
 # 徒歩での各地点間の移動距離を取得
-#distance_matrix = client.distance_matrix(locations=longlats, profile="foot-walking")['durations']
+distance_matrix = client.distance_matrix(locations=longlats, profile=mode_tuple[mode_num])['durations']
+print(distance_matrix)
 
-distance_matrix = [
-    [0, 899.8, 1283.97, 905.28, 1285.66], 
-    [899.8, 0, 923.11, 558.75, 1560.26], 
-    [1283.97, 923.11, 0, 404.39, 1354.36], 
-    [905.28, 558.75, 404.39, 0, 1112.71], 
-    [1285.66, 1560.26, 1354.36, 1121.71, 0]
-    ]
-
-# print(distance_matrix)
+# testdata
+# distance_matrix =[[0.0, 735.62, 1159.31, 1180.13, 1629.17, 1358.07, 798.86, 2338.93],
+#     [735.62, 0.0, 808.93, 1285.64, 1763.98, 1135.21, 462.87, 2165.55],
+#     [1159.31, 808.93, 0.0, 1194.45, 1544.57, 753.91, 460.39, 1946.15], 
+#     [1180.13, 1285.64, 1194.45, 0.0, 616.12, 926.34, 896.19, 1419.9], 
+#     [1629.17, 1763.98, 1544.57, 616.12, 0.0, 1131.22, 1357.5, 1023.45], 
+#     [1358.07, 1135.21, 753.91, 926.34, 1131.22, 0.0, 728.73, 1415.71], 
+#     [798.86, 462.87, 460.39, 896.19, 1357.5, 728.73, 0.0, 1759.07], 
+#     [2338.93, 2165.55, 1946.15, 1419.9, 1023.45, 1415.71, 1759.07, 0.0]]
 
 # 移動経路を計算
 route = model.find_route.Route(distance_matrix)
-# スタートとゴール固定の場合
-u = route.start_to_end()
-# スタートに戻る場合
-# u = route.return_start()
+
+if method == 0 :
+    # スタートとゴール固定の場合
+    u = route.start_to_end()
+elif method == 1 :
+    # スタートに戻る場合
+    u = route.return_start()
+    # 最終目的値にスタート地点を代入
+    u.append(len(u))
+    longlats.append(longlats[0])
+    latlongs.append(latlongs[0])
 
 #print(u)
 
@@ -70,7 +85,7 @@ for i in range(len(u)):
 # print(new_longlats)
 
 # 複数点間の経路を検索
-routedict=client.directions(new_longlats,profile="foot-walking")
+routedict=client.directions(new_longlats,profile=mode_tuple[mode_num])
 geometry = routedict["routes"][0]["geometry"]
 decoded = convert.decode_polyline(geometry)
 route = reverse_lat_long(decoded["coordinates"])

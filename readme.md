@@ -23,3 +23,8 @@
 ## 参考にした web サイトなど
 
   - https://qiita.com/tubarin/items/774b61ffbde17c7df89a
+
+## Memo
+
+  - pipreqs --encoding UTF8 .
+  - pip install -r requirements.txt

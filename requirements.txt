@@ -1,0 +1,9 @@
+beautifulsoup4==4.11.1
+branca==0.6.0
+folium==0.14.0
+openrouteservice==2.3.3
+pandas==1.5.3
+PuLP==2.7.0
+python-dotenv==1.0.0
+Requests==2.31.0
+tqdm==4.64.1
